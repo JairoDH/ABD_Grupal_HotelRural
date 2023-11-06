@@ -4,9 +4,9 @@ Proyecto grupal sobre la gestión de un hotel rural en la cual vamos a utilizar 
 
 Colaboradores :
 
-    + Fabio Gónzalez del Valle (Portavoz).
-    + Oscar Ponce de Leon Sanabria (Facilitador).
-    + Jairo Domínguez Hidalgo (Coordinador).
+    - Fabio Gónzalez del Valle (Portavoz).
+    - Oscar Ponce de Leon Sanabria (Facilitador).
+    - Jairo Domínguez Hidalgo (Coordinador).
     
 
 

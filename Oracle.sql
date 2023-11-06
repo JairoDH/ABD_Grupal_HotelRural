@@ -1,3 +1,5 @@
+-- Creación de tablas
+
 create table temporadas
 (
 	codigo			varchar2(9),
