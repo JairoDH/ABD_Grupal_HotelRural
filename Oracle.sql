@@ -130,11 +130,11 @@ create table actividadesrealizadas
 -//Temporadas	
 
 insert into temporadas
-values ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024'.'DD-MM-YYYY'));
+values ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
 insert into temporadas
-values ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023'.'DD-MM-YYYY'));
+values ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
 insert into temporadas
-values ('03','Especial', to_date('24-14-2023','DD-MM-YYYY'), to_date('06-01-2023'.'DD-MM-YYYY'));
+values ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
 
 
 -//Regimenes	
@@ -155,6 +155,10 @@ insert into tipos_de_habitacion
 values ('02','Habitacion doble');
 insert into tipos_de_habitacion
 values ('03','Habitacion triple');
+insert into tipos_de_habitacion
+values ('04','Suite');
+insert into tipos_de_habitacion
+values ('05','Bungalow');
 
 
 -//Tarifas -- codigo, codigotipohabitacion, codigotemporada, codigoregimen, preciopordia
@@ -291,6 +295,7 @@ insert into personas
 values ('95327640T','Juan Carlos','Romero Diaz','C\ San Lorenzo n� 22','Ajalvir (Madrid)');
 insert into personas
 values ('06852683V','Francisco','Franco Giraldez','AAVV Rosales n� 1','Legan�s (Madrid)');
+
 
 -//Estancias -- codigo, fecha inicio, fecha fin, numerohabitacion, nifresponsable, nifcliente, codigoregimen
 insert into estancias
