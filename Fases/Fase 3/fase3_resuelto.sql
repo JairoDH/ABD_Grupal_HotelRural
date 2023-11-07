@@ -10,6 +10,14 @@
 -- 3. Muestra el número de estancias que no han realizado ningún tipo de actividad extra en
 -- el último año agrupando por regimen de alojamiento.
 
+SELECT r.nombre, COUNT(e.codigo) AS numero_estancias
+FROM estancias e
+JOIN regimenes r ON e.codigoregimen = r.codigo
+LEFT JOIN actividadesrealizadas ar ON e.codigo = ar.codigoestancia 
+    AND ar.fecha BETWEEN SYSDATE - INTERVAL '1' YEAR AND SYSDATE
+WHERE ar.codigoestancia IS NULL
+GROUP BY r.nombre;
+
 -- 4. Muestra nombre y apellidos de los clientes que han realizado más de dos estancias de
 -- más de una semana en una habitación de tipo suite.
 
