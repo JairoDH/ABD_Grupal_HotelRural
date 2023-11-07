@@ -16,6 +16,14 @@
 -- 5. Muestra los nombres de los clientes que han venido al hotel tanto en primavera como
 -- en verano como en otoño.
 
+SELECT p.nombre, p.apellidos
+FROM personas p
+WHERE p.nif IN (
+    SELECT e.nifcliente
+    FROM estancias e
+    WHERE e.fecha_inicio >= TO_DATE('21-12-2015', 'DD-MM-YYYY') 
+    AND e.fecha_inicio <= TO_DATE('21-03-2016', 'DD-MM-YYYY')
+);
 -- 6. Muestra, para cada actividad con un coste para el hotel de más de diez euros, el
 -- número de personas en regimen de todo incluido que las han realizado, incluyendo
 -- aquéllas actividades que no hayan sido realizadas por ninguna.

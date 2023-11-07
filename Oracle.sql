@@ -125,7 +125,7 @@ create table actividadesrealizadas
 
 
 
-/// INTRODUCCI�N DE DATOS
+/// INTRODUCCIÓN DE DATOS
 
 -//Temporadas	
 
@@ -142,7 +142,7 @@ INSERT INTO regimenes VALUES ('TI','Todo INcluido');
 
 
 -//Tipos de habitacion	
-INSERT INTO tipos_de_habitacion VALUES ('01','Habitacion INdividual');
+INSERT INTO tipos_de_habitacion VALUES ('01','Habitacion individual');
 INSERT INTO tipos_de_habitacion VALUES ('02','Habitacion doble');
 INSERT INTO tipos_de_habitacion VALUES ('03','Habitacion triple');
 
