@@ -129,9 +129,12 @@ create table actividadesrealizadas
 
 -//Temporadas	
 
-INSERT INTO temporadas VALUES ('01','Baja', to_DATE('01-11-2023','DD-MM-YYYY'), to_DATE('31-03-2024','DD-MM-YYYY'));
-INSERT INTO temporadas VALUES ('02','Alta', to_DATE('01-04-2023','DD-MM-YYYY'), to_DATE('31-10-2023','DD-MM-YYYY'));
-INSERT INTO temporadas VALUES ('03','Especial', to_DATE('24-12-2023','DD-MM-YYYY'), to_DATE('06-01-2024','DD-MM-YYYY'));
+insert into temporadas
+values ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
+insert into temporadas
+values ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
+insert into temporadas
+values ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
 
 
 -//Regimenes	
@@ -142,9 +145,16 @@ INSERT INTO regimenes VALUES ('TI','Todo INcluido');
 
 
 -//Tipos de habitacion	
-INSERT INTO tipos_de_habitacion VALUES ('01','Habitacion individual');
-INSERT INTO tipos_de_habitacion VALUES ('02','Habitacion doble');
-INSERT INTO tipos_de_habitacion VALUES ('03','Habitacion triple');
+insert into tipos_de_habitacion
+values ('01','Habitacion individual');
+insert into tipos_de_habitacion
+values ('02','Habitacion doble');
+insert into tipos_de_habitacion
+values ('03','Habitacion triple');
+insert into tipos_de_habitacion
+values ('04','Suite');
+insert into tipos_de_habitacion
+values ('05','Bungalow');
 
 
 -//Tarifas -- codigo, codigotipohabitacion, codigotemporada, codigoregimen, preciopordia
@@ -213,6 +223,7 @@ INSERT INTO personas VALUES ('10950967T','Ana','Gutierrez Bando','C\ Burgos n 3'
 INSERT INTO personas VALUES ('88095695Z','Adrian','Garcia Guerra','C\ Nueva n 14','Mozarbez (Salamanca)');
 INSERT INTO personas VALUES ('95327640T','Juan Carlos','Romero Diaz','C\ San LORenzo n 22','Ajalvir (Madrid)');
 INSERT INTO personas VALUES ('06852683V','Francisco','Franco Giraldez','AAVV Rosales n 1','Leganes (Madrid)');
+
 
 -//Estancias -- codigo, fecha inicio, fecha fin, numerohabitacion, nifresponsable, nifcliente, codigoregimen
 INSERT INTO estancias VALUES ('00',to_DATE('11-03-2016 12:00','DD-MM-YYYY hh24:mi'),to_DATE('13-03-2016 12:00','DD-MM-YYYY hh24:mi'),'00','54890865P','54890865P','AD');

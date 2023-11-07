@@ -13,6 +13,19 @@
 -- 4. Muestra nombre y apellidos de los clientes que han realizado más de dos estancias de
 -- más de una semana en una habitación de tipo suite.
 
+SELECT p.nombre, p.apellidos
+FROM personas p
+WHERE (
+    SELECT count(*)
+    FROM estancias e
+    WHERE e.nifcliente = p.nif
+    AND e.fecha_fin - e.fecha_inicio >= 7
+    AND numerohabitacion IN (
+        SELECT numero from habitaciones WHERE
+        codigotipo = '04'
+    )
+) >2 ;
+
 -- 5. Muestra los nombres de los clientes que han venido al hotel tanto en primavera como
 -- en verano como en otoño.
 
