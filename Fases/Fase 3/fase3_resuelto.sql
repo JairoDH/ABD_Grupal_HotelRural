@@ -45,6 +45,11 @@ WHERE p.nif IN (
 -- 7. Muestra las habitaciones tipo suite que fueron ocupadas durante algún día de la
 -- temporada baja.
 
+SELECT count(*)
+FROM tarifas
+WHERE codigotipohabitacion = '01' 
+AND codigotemporada = '01';
+
 -- 8. Muestra el número de actividades realizadas en la estancia más reciente de cada uno
 -- de los clientes.
 
