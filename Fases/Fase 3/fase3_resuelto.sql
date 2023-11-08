@@ -47,9 +47,22 @@ WHERE p.nif IN (
 -- 8. Muestra el número de actividades realizadas en la estancia más reciente de cada uno
 -- de los clientes.
 
+select e.codigo as codigoestancia,
+count (a.codigoactividad) as numero_actividades
+from estancias e
+left join actividadesrealizadas a on e.codigo = a.codigoestancia
+where (e.codigo, e.fecha_inicio) in (
+    select codigo, MAX(fecha_inicio)
+    from estancias
+    group by codigo
+)
+group by e.codigo
+order by e.codigo;
+
 -- 9. Muestra los nombres de las actividades que no han sido realizadas por ningún cliente
 -- que no estuviera alojado en regimen de todo incluido en los últimos dos meses.
 
 -- 10. Crea una vista con el nombre y apellidos del cliente, el nombre del regimen en que se
 -- aloja y el tipo de habitación para aquellas estancias actuales que tienen pendiente de
 -- pago alguna actividad realizada.
+
