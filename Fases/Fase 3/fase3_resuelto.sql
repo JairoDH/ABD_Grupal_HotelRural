@@ -4,8 +4,30 @@
 -- oportuno.
 
 -- 2. La actividad que han realizado más personas que se alojaban en regimen de todo
--- incluido en los últimos tres meses sube su precio un 10%. Refleja el cambio en la base
+-- incluido en los últimos nueves meses sube su precio un 10%. Refleja el cambio en la base
 -- de datos.
+
+                -- Consulta para sacar el código:
+
+                    SELECT SUM(numpersonas), codigoactividad
+                    FROM actividadesrealizadas
+                    WHERE codigoestancia IN (
+                                                SELECT codigo
+                                                FROM estancias
+                                                WHERE fecha_fin >= (SELECT MAX(fecha_fin) FROM estancias ) - INTERVAL '9' MONTH
+                                                AND codigoregimen IN (
+                                                                        SELECT codigo
+                                                                        FROM regimenes
+                                                                        WHERE nombre = 'Todo Incluido')
+                    )
+                    GROUP BY codigoactividad;
+
+                -- Actualizar el precio de la actividad:
+
+                    UPDATE actividades
+                    SET precioporpersona = precioporpersona * 1.10
+                    WHERE codigo = 'A032'
+
 
 -- 3. Muestra el número de estancias que no han realizado ningún tipo de actividad extra en
 -- el último año agrupando por regimen de alojamiento.
