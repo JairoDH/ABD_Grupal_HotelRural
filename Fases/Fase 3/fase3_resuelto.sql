@@ -53,10 +53,18 @@ WHERE p.nif IN (
 -- 7. Muestra las habitaciones tipo suite que fueron ocupadas durante algún día de la
 -- temporada baja.
 
-SELECT count(*)
-FROM tarifas
-WHERE codigotipohabitacion = '01' 
-AND codigotemporada = '01';
+SELECT count(*) as numeroestancias, numerohabitacion
+FROM estancias e
+WHERE e.fecha_inicio BETWEEN TO_DATE('01-11-2015', 'DD-MM-YYYY') AND TO_DATE('31-03-2016', 'DD-MM-YYYY')
+AND e.numerohabitacion IN (
+               				SELECT numero
+                			FROM habitaciones h
+							WHERE h.codigotipo IN (
+													SELECT codigo
+													FROM tipos_de_habitacion
+													WHERE nombre = 'Habitacion individual')
+)
+GROUP BY e.numerohabitacion;
 
 -- 8. Muestra el número de actividades realizadas en la estancia más reciente de cada uno
 -- de los clientes.
