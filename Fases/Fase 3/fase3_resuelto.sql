@@ -83,7 +83,7 @@ AND e.numerohabitacion IN (
 							WHERE h.codigotipo IN (
 													SELECT codigo
 													FROM tipos_de_habitacion
-													WHERE nombre = 'Habitacion individual')
+													WHERE nombre = 'Suite')
 )
 GROUP BY e.numerohabitacion;
 
