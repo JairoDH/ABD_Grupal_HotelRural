@@ -10,6 +10,14 @@
 -- 3. Muestra el número de estancias que no han realizado ningún tipo de actividad extra en
 -- el último año agrupando por regimen de alojamiento.
 
+SELECT r.nombre, COUNT(e.codigo) AS numero_estancias
+FROM estancias e
+JOIN regimenes r ON e.codigoregimen = r.codigo
+LEFT JOIN actividadesrealizadas ar ON e.codigo = ar.codigoestancia 
+    AND ar.fecha BETWEEN SYSDATE - INTERVAL '1' YEAR AND SYSDATE
+WHERE ar.codigoestancia IS NULL
+GROUP BY r.nombre;
+
 -- 4. Muestra nombre y apellidos de los clientes que han realizado más de dos estancias de
 -- más de una semana en una habitación de tipo suite.
 
@@ -35,14 +43,20 @@ WHERE p.nif IN (
     SELECT e.nifcliente
     FROM estancias e
     WHERE e.fecha_inicio >= TO_DATE('21-12-2015', 'DD-MM-YYYY') 
-    AND e.fecha_inicio <= TO_DATE('21-03-2016', 'DD-MM-YYYY')
+    AND e.fecha_inicio <= TO_DATE('21-03-2015', 'DD-MM-YYYY')
 );
+
 -- 6. Muestra, para cada actividad con un coste para el hotel de más de diez euros, el
 -- número de personas en regimen de todo incluido que las han realizado, incluyendo
 -- aquéllas actividades que no hayan sido realizadas por ninguna.
 
 -- 7. Muestra las habitaciones tipo suite que fueron ocupadas durante algún día de la
 -- temporada baja.
+
+SELECT count(*)
+FROM tarifas
+WHERE codigotipohabitacion = '01' 
+AND codigotemporada = '01';
 
 -- 8. Muestra el número de actividades realizadas en la estancia más reciente de cada uno
 -- de los clientes.
@@ -65,4 +79,3 @@ order by e.codigo;
 -- 10. Crea una vista con el nombre y apellidos del cliente, el nombre del regimen en que se
 -- aloja y el tipo de habitación para aquellas estancias actuales que tienen pendiente de
 -- pago alguna actividad realizada.
-
