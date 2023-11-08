@@ -42,8 +42,7 @@ FROM personas p
 WHERE p.nif IN (
     SELECT e.nifcliente
     FROM estancias e
-    WHERE e.fecha_inicio >= TO_DATE('21-12-2015', 'DD-MM-YYYY') 
-    AND e.fecha_inicio <= TO_DATE('21-03-2015', 'DD-MM-YYYY')
+    WHERE e.fecha_inicio BETWEEN TO_DATE('21-03-2015', 'DD-MM-YYYY') AND TO_DATE('21-12-2015', 'DD-MM-YYYY')
 );
 
 -- 6. Muestra, para cada actividad con un coste para el hotel de más de diez euros, el
