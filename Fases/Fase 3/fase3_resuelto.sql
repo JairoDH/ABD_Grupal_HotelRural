@@ -71,6 +71,17 @@ WHERE p.nif IN (
 -- número de personas en regimen de todo incluido que las han realizado, incluyendo
 -- aquéllas actividades que no hayan sido realizadas por ninguna.
 
+SELECT a.codigo AS codigo_actividad, 
+       a.nombre AS nombre_actividad, 
+       COUNT(ar.numpersonas) AS personas_todo_incluido
+FROM actividades a
+LEFT JOIN actividadesrealizadas ar ON a.codigo = ar.codigoactividad
+LEFT JOIN estancias e ON ar.codigoestancia = e.codigo AND e.codigoregimen = 'TI'
+WHERE a.costepersonaparahotel >= 10
+GROUP BY a.codigo, a.nombre;
+
+
+
 -- 7. Muestra las habitaciones tipo suite que fueron ocupadas durante algún día de la
 -- temporada baja.
 
@@ -104,6 +115,19 @@ order by e.codigo;
 
 -- 9. Muestra los nombres de las actividades que no han sido realizadas por ningún cliente
 -- que no estuviera alojado en regimen de todo incluido en los últimos dos meses.
+
+SELECT a.nombre AS nombre_actividad
+FROM actividades a
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM actividadesrealizadas ar
+    JOIN estancias e ON ar.codigoestancia = e.codigo
+    JOIN tarifas t ON e.codigoregimen = t.codigoregimen AND e.nifcliente = t.codigotipohabitacion
+    WHERE ar.codigoactividad = a.codigo
+    AND t.codigoregimen != 'TI'
+    AND e.fecha_inicio >= TRUNC(SYSDATE, 'MONTH') - INTERVAL '2' MONTH
+    AND e.fecha_fin <= SYSDATE
+);
 
 -- 10. Crea una vista con el nombre y apellidos del cliente, el nombre del regimen en que se
 -- aloja y el tipo de habitación para aquellas estancias actuales que tienen pendiente de
