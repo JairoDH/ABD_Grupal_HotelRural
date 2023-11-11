@@ -132,3 +132,20 @@ WHERE NOT EXISTS (
 -- 10. Crea una vista con el nombre y apellidos del cliente, el nombre del regimen en que se
 -- aloja y el tipo de habitación para aquellas estancias actuales que tienen pendiente de
 -- pago alguna actividad realizada.
+
+create or replace view vista_estancias_pendientepago as
+select p.nombre as nombre_cliente,
+p.apellidos as appellido_cliente,
+r.nombre as nombre_regimen, 
+th.nombre as nombre_tipo_tabitacion
+from estancias e
+join personas p on p.nif = e.nifcliente
+join regimenes r on e.codigoregimen = r.codigo
+join habitaciones h on h.numero = e.numerohabitacion
+join tipos_de_habitacion th on th.codigo = h.codigotipo
+where e.codigo in (
+    select codigoestancia
+    from actividadesrealizadas
+    where abonado = 'N'
+    )
+and SYSDATE between e.fecha_inicio and fecha_fin;
