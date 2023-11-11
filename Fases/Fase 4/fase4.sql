@@ -279,7 +279,7 @@
 -- estancia en regimen TI el campo Abonado no pueda valer FALSE.
 
     CREATE OR REPLACE TRIGGER ActividadenTI
-    AFTER INSERT ON ActividadesRealizadas
+    AFTER INSERT ON actividadesrealizadas
     fOR EACH ROW
     DECLARE
         v_estancia VARCHAR2(2);
@@ -289,9 +289,9 @@
         WHERE codigo IN (SELECT codigoregimen
                          FROM estancias
                          WHERE codigo = :new.codigoestancia);
-                         
+
         IF v_estancia = 'TI' AND :new.abonado = 'N' THEN
-            RAISE_APPLICATION_ERROR(-21000, 'El campo abonado en la actividad de regimen Todo Incluido no puede estar en N.')
+            RAISE_APPLICATION_ERROR(-21000, 'La actividad en regimen Todo Incluido debe estar abonada.')
         END IF;  
     END;
     /
