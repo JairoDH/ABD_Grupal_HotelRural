@@ -141,7 +141,7 @@ values ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023
 INSERT INTO regimenes VALUES ('AD','Alojamiento y Desayuno');
 INSERT INTO regimenes VALUES ('MP','Media pension');
 INSERT INTO regimenes VALUES ('PC','Pension completa');
-INSERT INTO regimenes VALUES ('TI','Todo INcluido');
+INSERT INTO regimenes VALUES ('TI','Todo Incluido');
 
 
 -//Tipos de habitacion	

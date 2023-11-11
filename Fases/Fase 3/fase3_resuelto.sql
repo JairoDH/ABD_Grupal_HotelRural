@@ -4,8 +4,30 @@
 -- oportuno.
 
 -- 2. La actividad que han realizado más personas que se alojaban en regimen de todo
--- incluido en los últimos tres meses sube su precio un 10%. Refleja el cambio en la base
+-- incluido en los últimos nueves meses sube su precio un 10%. Refleja el cambio en la base
 -- de datos.
+
+                -- Consulta para sacar el código:
+
+                    SELECT SUM(numpersonas), codigoactividad
+                    FROM actividadesrealizadas
+                    WHERE codigoestancia IN (
+                                                SELECT codigo
+                                                FROM estancias
+                                                WHERE fecha_fin >= (SELECT MAX(fecha_fin) FROM estancias ) - INTERVAL '9' MONTH
+                                                AND codigoregimen IN (
+                                                                        SELECT codigo
+                                                                        FROM regimenes
+                                                                        WHERE nombre = 'Todo Incluido')
+                    )
+                    GROUP BY codigoactividad;
+
+                -- Actualizar el precio de la actividad:
+
+                    UPDATE actividades
+                    SET precioporpersona = precioporpersona * 1.10
+                    WHERE codigo = 'A032'
+
 
 -- 3. Muestra el número de estancias que no han realizado ningún tipo de actividad extra en
 -- el último año agrupando por regimen de alojamiento.
@@ -42,21 +64,39 @@ FROM personas p
 WHERE p.nif IN (
     SELECT e.nifcliente
     FROM estancias e
-    WHERE e.fecha_inicio >= TO_DATE('21-12-2015', 'DD-MM-YYYY') 
-    AND e.fecha_inicio <= TO_DATE('21-03-2015', 'DD-MM-YYYY')
+    WHERE e.fecha_inicio BETWEEN TO_DATE('21-03-2015', 'DD-MM-YYYY') AND TO_DATE('21-12-2015', 'DD-MM-YYYY')
 );
 
 -- 6. Muestra, para cada actividad con un coste para el hotel de más de diez euros, el
 -- número de personas en regimen de todo incluido que las han realizado, incluyendo
 -- aquéllas actividades que no hayan sido realizadas por ninguna.
 
+SELECT a.codigo AS codigo_actividad, 
+       a.nombre AS nombre_actividad, 
+       COUNT(ar.numpersonas) AS personas_todo_incluido
+FROM actividades a
+LEFT JOIN actividadesrealizadas ar ON a.codigo = ar.codigoactividad
+LEFT JOIN estancias e ON ar.codigoestancia = e.codigo AND e.codigoregimen = 'TI'
+WHERE a.costepersonaparahotel >= 10
+GROUP BY a.codigo, a.nombre;
+
+
+
 -- 7. Muestra las habitaciones tipo suite que fueron ocupadas durante algún día de la
 -- temporada baja.
 
-SELECT count(*)
-FROM tarifas
-WHERE codigotipohabitacion = '01' 
-AND codigotemporada = '01';
+SELECT count(*) as numeroestancias, numerohabitacion
+FROM estancias e
+WHERE e.fecha_inicio BETWEEN TO_DATE('01-11-2015', 'DD-MM-YYYY') AND TO_DATE('31-03-2016', 'DD-MM-YYYY')
+AND e.numerohabitacion IN (
+               				SELECT numero
+                			FROM habitaciones h
+							WHERE h.codigotipo IN (
+													SELECT codigo
+													FROM tipos_de_habitacion
+													WHERE nombre = 'Suite')
+)
+GROUP BY e.numerohabitacion;
 
 -- 8. Muestra el número de actividades realizadas en la estancia más reciente de cada uno
 -- de los clientes.
@@ -75,6 +115,19 @@ order by e.codigo;
 
 -- 9. Muestra los nombres de las actividades que no han sido realizadas por ningún cliente
 -- que no estuviera alojado en regimen de todo incluido en los últimos dos meses.
+
+SELECT a.nombre AS nombre_actividad
+FROM actividades a
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM actividadesrealizadas ar
+    JOIN estancias e ON ar.codigoestancia = e.codigo
+    JOIN tarifas t ON e.codigoregimen = t.codigoregimen AND e.nifcliente = t.codigotipohabitacion
+    WHERE ar.codigoactividad = a.codigo
+    AND t.codigoregimen != 'TI'
+    AND e.fecha_inicio >= TRUNC(SYSDATE, 'MONTH') - INTERVAL '2' MONTH
+    AND e.fecha_fin <= SYSDATE
+);
 
 -- 10. Crea una vista con el nombre y apellidos del cliente, el nombre del regimen en que se
 -- aloja y el tipo de habitación para aquellas estancias actuales que tienen pendiente de
