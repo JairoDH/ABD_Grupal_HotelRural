@@ -278,6 +278,28 @@
 --3.Realiza un trigger que impida que haga que cuando se inserte la realización de una actividad asociada a una
 -- estancia en regimen TI el campo Abonado no pueda valer FALSE.
 
+    CREATE OR REPLACE TRIGGER ActividadenTI
+    AFTER INSERT ON ActividadesRealizadas
+    fOR EACH ROW
+    DECLARE
+        v_estancia VARCHAR2(2);
+    BEGIN
+        SELECT codigo INTO v_estancia
+        FROM regimenes
+        WHERE codigo IN (SELECT codigoregimen
+                         FROM estancias
+                         WHERE codigo = :new.codigoestancia);
+                         
+        IF v_estancia = 'TI' AND :new.abonado = 'N' THEN
+            RAISE_APPLICATION_ERROR(-21000, 'El campo abonado en la actividad de regimen Todo Incluido no puede estar en N.')
+        END IF;  
+    END;
+    /
+    -- comprobar trigger --
+    INSERT INTO actividadesrealizadas VALUES ('04','B302',TO_DATE('10-08-2022 12:00','DD-MM-YYYY hh24:mi'),4,'N');
+
+
+
 -- 4.Añade un campo email a los clientes y rellénalo para algunos de ellos. Realiza un trigger que cuando se rellene el
 -- campo Fecha de la Factura envíe por correo electrónico un resumen de la factura al cliente, incluyendo los datos
 -- fundamentales de la estancia, el importe de cada apartado y el importe total.
