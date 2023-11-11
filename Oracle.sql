@@ -116,7 +116,7 @@ create table actividadesrealizadas
 	codigoactividad		varchar2(9),
 	fecha			date,
 	numpersonas		number(6,2) default 1,
-	abonado			number(6,2),
+	abonado			VARCHAR2(1) default 'N',
 	constraint pk_actrealizadas primary key (codigoestancia, codigoactividad, fecha),
 	constraint fk_actrealestan foreign key (codigoestancia) references estancias(codigo),
 	constraint fk_actrealact foreign key (codigoactividad) references actividades(codigo),
@@ -129,12 +129,12 @@ create table actividadesrealizadas
 
 -//Temporadas	
 
-insert into temporadas
-values ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
-insert into temporadas
-values ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
-insert into temporadas
-values ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES  ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES  ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
 
 
 -//Regimenes	
@@ -145,16 +145,11 @@ INSERT INTO regimenes VALUES ('TI','Todo Incluido');
 
 
 -//Tipos de habitacion	
-insert into tipos_de_habitacion
-values ('01','Habitacion individual');
-insert into tipos_de_habitacion
-values ('02','Habitacion doble');
-insert into tipos_de_habitacion
-values ('03','Habitacion triple');
-insert into tipos_de_habitacion
-values ('04','Suite');
-insert into tipos_de_habitacion
-values ('05','Bungalow');
+INSERT INTO tipos_de_habitacion VALUES ('01','Habitacion individual');
+INSERT INTO tipos_de_habitacion VALUES ('02','Habitacion doble');
+INSERT INTO tipos_de_habitacion VALUES ('03','Habitacion triple');
+INSERT INTO tipos_de_habitacion VALUES ('04','Suite');
+INSERT INTO tipos_de_habitacion VALUES ('05','Bungalow');
 
 
 -//Tarifas -- codigo, codigotipohabitacion, codigotemporada, codigoregimen, preciopordia
@@ -244,7 +239,7 @@ INSERT INTO facturas VALUES ('04','05',to_DATE('12-01-2015 16:35','DD-MM-YYYY hh
 INSERT INTO facturas VALUES ('05','01',to_DATE('25-05-2015 17:00','DD-MM-YYYY hh24:mi'));
 
 -//Gastos Extras -- codigogasto, codigoestancia, fecha, concepto, cuantia
-insert into INSERT INTO gastos_extras VALUES ('00','03',to_DATE('15-03-2015 18:23','DD-MM-YYYY hh24:mi'),'Bolos',7);
+INSERT INTO gastos_extras VALUES ('00','03',to_DATE('15-03-2015 18:23','DD-MM-YYYY hh24:mi'),'Bolos',7);
 INSERT INTO gastos_extras VALUES ('01','02',to_DATE('20-09-2015 19:15','DD-MM-YYYY hh24:mi'),'Centro de pasatiempo de mascotas',12);
 INSERT INTO gastos_extras VALUES ('02','01',to_DATE('23-05-2015 12:40','DD-MM-YYYY hh24:mi'),'Piscina privada',2);
 INSERT INTO gastos_extras VALUES ('03','01',to_DATE('23-05-2015 17:50','DD-MM-YYYY hh24:mi'),'Wifi',2);
