@@ -288,7 +288,7 @@
 -- estancia en regimen TI el campo Abonado no pueda valer FALSE.
 
     CREATE OR REPLACE TRIGGER ActividadenTI
-    AFTER INSERT ON actividadesrealizadas
+    AFTER INSERT ON actividadrealizada
     fOR EACH ROW
     DECLARE
         v_estancia VARCHAR2(2);
@@ -305,7 +305,7 @@
     END;
     /
     -- comprobar trigger --
-    INSERT INTO actividadesrealizadas VALUES ('04','B302',TO_DATE('10-08-2022 12:00','DD-MM-YYYY hh24:mi'),4,'N');
+    INSERT INTO actividadrealizada VALUES ('04','B302',TO_DATE('10-08-2022 12:00','DD-MM-YYYY hh24:mi'),4,'N');
 
 
 
@@ -354,3 +354,42 @@
 -- 8.Realiza los módulos de programación necesarios para que un cliente no pueda realizar dos estancias que se
 -- solapen en fechas entre ellas, esto es, un cliente no puede comenzar una estancia hasta que no haya terminado la
 -- anterior.
+
+
+
+
+------------------------------------------- EJERCICIOS EN POSTGRESQL -------------------------------------------------
+
+
+-- Realiza un trigger que impida que haga que cuando se inserte la realización de una actividad asociada a una
+-- estancia en regimen TI el campo Abonado no pueda valer FALSE.
+
+CREATE OR REPLACE FUNCTION estanciaTI() 
+RETURNS TRIGGER AS $$
+DECLARE
+    v_estancia
+BEGIN
+    SELECT codigo INTO v_estancia
+    FROM regimenes
+    WHERE codigo IN (SELECT codigoregimen
+                     FROM estancias
+                     WHERE codigo = NEW.codigoestancia);
+
+    IF v_codigo = 'TI' AND NEW.abonado = 'N' THEN
+        RAISE NOTICE '%', 'La actividad en regimen Todo Incluido debe estar abonada';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER estanciaTI
+AFTER INSERT ON actividadrealizada
+FOR EACH ROW 
+EXECUTE FUNCTION estanciaTI();
+
+-- Comprobar trigger ---
+
+    INSERT INTO actividadrealizada VALUES ('04','B302',TO_DATE('10-08-2022 12:00','DD-MM-YYYY hh24:mi'),4,'N');
+
