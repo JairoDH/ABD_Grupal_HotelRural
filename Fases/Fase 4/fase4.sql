@@ -496,6 +496,21 @@ END;
 -- solapen en fechas entre ellas, esto es, un cliente no puede comenzar una estancia hasta que no haya terminado la
 -- anterior.
 
+-- Creacion del paquete para controlar las fechas.
+
+CREATE OR REPLACE PACKAGE fechas_superpuestas_pkg AS
+  TYPE registro_fechas_typ IS RECORD (
+    cliente_nif estancias.nifcliente%TYPE,
+    inicio_fecha estancias.fecha_inicio%TYPE,
+    fin_fecha estancias.fecha_fin%TYPE
+  );
+
+  TYPE tabla_fechas_typ IS TABLE OF registro_fechas_typ INDEX BY BINARY_INTEGER;
+  fechas_tabla tabla_fechas_typ;
+END fechas_superpuestas_pkg;
+/
+
+
 
 
 
