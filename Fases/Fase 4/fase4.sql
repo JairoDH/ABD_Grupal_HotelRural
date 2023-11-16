@@ -98,7 +98,7 @@ END;
 /
 
 
-- Actividad abonada 
+- Actividad abonada
 
 
 CREATE OR REPLACE PROCEDURE A_Abonada (p_codcl personas.nif%type,
@@ -498,7 +498,8 @@ END;
 
 -- Creacion del paquete para controlar las fechas.
 
-CREATE OR REPLACE PACKAGE fechas_superpuestas_pkg AS
+CREATE OR REPLACE PACKAGE Solapada AS
+
   TYPE registro_fechas_typ IS RECORD (
     cliente_nif estancias.nifcliente%TYPE,
     inicio_fecha estancias.fecha_inicio%TYPE,
@@ -506,10 +507,50 @@ CREATE OR REPLACE PACKAGE fechas_superpuestas_pkg AS
   );
 
   TYPE tabla_fechas_typ IS TABLE OF registro_fechas_typ INDEX BY BINARY_INTEGER;
-  fechas_tabla tabla_fechas_typ;
-END fechas_superpuestas_pkg;
+  fechas tabla_fechas_typ;
+END Solapada;
 /
 
+-----------------------------------------------------------------------------------------
+-- Rellenar tabla.
+
+CREATE OR REPLACE TRIGGER rellenarfechas
+BEFORE INSERT OR UPDATE ON estancias
+DECLARE
+  CURSOR cursor_fechas IS SELECT nifcliente, fecha_inicio, fecha_fin FROM estancias;
+  ind NUMBER := 0;
+BEGIN
+  FOR i IN cursor_fechas LOOP
+    Solapada.fechas(ind).cliente_nif := i.nifcliente;
+    Solapada.fechas(ind).inicio_fecha := i.fecha_inicio;
+    Solapada.fechas(ind).fin_fecha := i.fecha_fin;
+    indice := indice + 1;
+  END LOOP;
+END rellenarfechas;
+/
+
+--------------------------------------------------------------------------------------------------
+-- Comprobar fecha
+
+
+CREATE OR REPLACE TRIGGER comprobarfecha
+BEFORE INSERT OR UPDATE ON estancias
+FOR EACH ROW
+DECLARE
+BEGIN
+  FOR i IN Solapada.fechas.FIRST..Solapada.fechas.LAST LOOP
+    IF Solapada.fechas(i).cliente_nif = :NEW.nifcliente THEN
+      IF :NEW.fecha_inicio BETWEEN Solapada.fechas(i).inicio_fecha AND Solapada.fechas(i).fin_fecha THEN
+        RAISE_APPLICATION_ERROR(-20000, 'No se puede mas de dos en el mismo dia');
+      END IF;
+      
+      IF :NEW.fecha_fin BETWEEN Solapada.fechas(i).inicio_fecha AND Solapada.fechas(i).fin_fecha THEN
+        RAISE_APPLICATION_ERROR(-20000, 'No se puede mas de dos en el mismo dia');
+      END IF;
+    END IF;
+  END LOOP;
+END comprobarfecha;
+/
 
 
 
