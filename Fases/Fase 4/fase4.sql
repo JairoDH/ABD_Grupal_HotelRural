@@ -545,7 +545,7 @@ BEGIN
       END IF;
       
       IF :NEW.fecha_fin BETWEEN Solapada.fechas(i).inicio_fecha AND Solapada.fechas(i).fin_fecha THEN
-        RAISE_APPLICATION_ERROR(-20000, 'No se puede mas de dos en el mismo dia');
+        RAISE_APPLICATION_ERROR(-20001, 'No se puede mas de dos en el mismo dia');
       END IF;
     END IF;
   END LOOP;
