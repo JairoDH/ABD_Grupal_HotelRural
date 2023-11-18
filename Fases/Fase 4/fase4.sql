@@ -53,7 +53,7 @@
 
 
         -- Función para devolver el nombre del cliente por el código de la estancia
-        CREATE OR REPLACE FUNCTION NombreCliente (p_CodEst estancias.codigo%TYPE)
+        CREATE OR REPLACE FUNCTION f_devolver_nombrecliente (p_CodEst estancias.codigo%TYPE)
         RETURN VARCHAR2
         IS 
             v_nombre VARCHAR2(100);
@@ -67,28 +67,33 @@
             RETURN v_nombre;
         EXCEPTION
             WHEN NO_DATA_FOUND THEN 
-                RETURN NULL;
+                RETURN 'No se ha encontrado cliente';
             WHEN TOO_MANY_ROWS THEN
-                RETURN NULL;
+                RETURN 'error, hay más de un cliente registrado con ese código';
         END;
         /
 
         -- Procedimiento para mostrar la habitación con las fechas de la estancia.
-            CREATE OR REPLACE PROCEDURE Habitacion (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE PROCEDURE p_mostrar_estancia (p_CodEst estancias.codigo%TYPE)
             AS
                 CURSOR c_alojamiento IS
                 SELECT numerohabitacion, fecha_inicio, fecha_fin
                 FROM estancias
                 WHERE codigo = p_CodEst;
             BEGIN
-                FOR c IN c_alojamiento LOOP
-                DBMS_OUTPUT.PUT_LINE('Número Habitación: '||c.numerohabitacion||' Fecha Inicio: '||c.fecha_inicio||' Fecha Fin: '||c.fecha_fin);
+                FOR c_registro IN c_alojamiento LOOP
+                DBMS_OUTPUT.PUT_LINE('Número Habitación: '||c_registro.numerohabitacion||' Fecha Inicio: '||c_registro.fecha_inicio||' Fecha Fin: '||c_registro.fecha_fin);
                 END LOOP;
+            EXCEPTION
+                WHEN NO_DATA_FOUND THEN 
+                    DBMS_OUTPUT.PUT_LINE('No se ha encontrado estancia');
+                WHEN TOO_MANY_ROWS THEN
+                    DBMS_OUTPUT.PUT_LINE('Se ha encontrado más de una estancia con ese código');
             END;
             /
     
         -- Procedimiento para mostrar la estancia, cliente y el tipo de régimen.
-            CREATE OR REPLACE PROCEDURE Regimen (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE PROCEDURE p_mostrar_regimen (p_CodEst estancias.codigo%TYPE)
             AS 
                 CURSOR c_regimen IS
                 SELECT nombre
@@ -97,17 +102,17 @@
                                 FROM estancias
                                 WHERE codigo = p_CodEst);
             BEGIN
-                FOR c IN c_regimen LOOP
+                FOR c_registro IN c_regimen LOOP
                     DBMS_OUTPUT.PUT_LINE('Codigo Estancia: '||p_CodEst);
-                    DBMS_OUTPUT.PUT_LINE('Cliente: '||NombreCliente(p_CodEst));
-                    Habitacion(p_CodEst);
-                    DBMS_OUTPUT.PUT_LINE('Regimen de Alojamiento: '||c.nombre);
+                    DBMS_OUTPUT.PUT_LINE('Cliente: '||f_devolver_nombrecliente(p_CodEst));
+                    p_mostrar_estancia(p_CodEst);
+                    DBMS_OUTPUT.PUT_LINE('Regimen de Alojamiento: '||c_registro.nombre);
                 END LOOP;
             END;
             /
 
         -- Función para devolver el importe total
-            CREATE OR REPLACE FUNCTION ImporteAlojamiento (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE FUNCTION f_devolver_ImporteAlojamiento (p_CodEst estancias.codigo%TYPE)
             RETURN NUMBER
             IS
                 v_importe NUMBER;
@@ -122,13 +127,13 @@
             /
 
         -- Procedimiento para que muestre el importe total por el código de estancia
-            CREATE OR REPLACE PROCEDURE Alojamiento (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE PROCEDURE p_motrar_importealojamiento (p_CodEst estancias.codigo%TYPE)
             AS
                 CURSOR c_alojamiento IS
                     SELECT te.nombre, te.fecha_fin - te.fecha_inicio AS dias, ta.preciopordia
                     FROM temporadas te
                     JOIN tarifas ta ON te.codigo = ta.codigotemporada
-                    WHERE ta.codigoregimen = (SELECT codigoregimen
+                    WHERE ta.codigoregimen = (SELECT codigoregimen, 
                                               FROM estancias
                                               WHERE codigo = p_CodEst)
                     ORDER BY te.nombre;
@@ -137,17 +142,20 @@
                 DBMS_OUTPUT.PUT_LINE('Alojamiento');
                 DBMS_OUTPUT.PUT_LINE('-----------');
 
-                FOR c IN c_alojamiento LOOP
-                    DBMS_OUTPUT.PUT_LINE(c.nombre || chr(7) || c.dias || chr(7) || c.preciopordia);
+                FOR c_registro IN c_alojamiento LOOP
+                    DBMS_OUTPUT.PUT_LINE(c_registro.nombre||chr(9)||c_registro.dias||chr(9)||c_registro.preciopordia);
                 END LOOP;
 
-                DBMS_OUTPUT.PUT_LINE('Importe Total Alojamiento: ' || ImporteAlojamiento(p_CodEst));
+                DBMS_OUTPUT.PUT_LINE('Importe Total Alojamiento: ' || f_devolver_ImporteAlojamiento(p_CodEst));
+            EXCEPTION
+                WHEN NO_DATA_FOUND THEN 
+                    DBMS_OUTPUT.PUT_LINE('No se ha encontrado alojamiento');
             END;
             /
 
         
         -- Función para devolver los gastos extras
-            CREATE OR REPLACE FUNCTION ImporteGastosExtras (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE FUNCTION f_devolver_importeGastosExtras (p_CodEst estancias.codigo%TYPE)
             RETURN NUMBER
             IS
             	v_gastos NUMBER;
@@ -162,7 +170,7 @@
             /
         
         -- Función para comprobar regimen de Todo Incluido
-            CREATE OR REPLACE FUNCTION TodoIncluido (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE FUNCTION f_comprobar_TodoIncluido (p_CodEst estancias.codigo%TYPE)
             RETURN VARCHAR2
             IS
                 v_codigo regimenes.codigo%TYPE;
@@ -181,7 +189,7 @@
             /
 
         -- Procedimiento para mostrar los gastos extras por el cliente
-            CREATE OR REPLACE PROCEDURE GastosExtras (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE PROCEDURE p_mostrar_GastosExtras (p_CodEst estancias.codigo%TYPE)
 		    AS
                 CURSOR c_gastoextra IS
                     SELECT concepto, fecha, cuantia
@@ -190,21 +198,21 @@
                                             FROM estancias
                                             WHERE codigo = p_CodEst);
             BEGIN
-                IF TodoIncluido(p_CodEst) != 'TI' THEN
-                    FOR c IN c_gastoextra LOOP
+                IF f_comprobar_TodoIncluido(p_CodEst) != 'TI' THEN
+                    FOR c_registro IN c_gastoextra LOOP
                         DBMS_OUTPUT.PUT_LINE('Gastos extras');
                         DBMS_OUTPUT.PUT_LINE('-------------');
-                        DBMS_OUTPUT.PUT_LINE(c.concepto||chr(7)||c.fecha||chr(7)||c.cuantia);
+                        DBMS_OUTPUT.PUT_LINE(c_registro.concepto||chr(7)||c_registro.fecha||chr(7)||c_registro.cuantia);
                     END LOOP;
-                    DBMS_OUTPUT.PUT_LINE('Importe Total Gastos Extras: '||ImporteGastosExtras(p_CodEst));
-                ELSIF TodoIncluido(p_CodEst) = 'TI' THEN
+                    DBMS_OUTPUT.PUT_LINE('Importe Total Gastos Extras: '||f_devolver_importeGastosExtras(p_CodEst));
+                ELSIF f_comprobar_TodoIncluido(p_CodEst) = 'TI' THEN
                     DBMS_OUTPUT.PUT_LINE('');
                 END IF;
             END;
             /
 
         -- Función para devolver el importe de las actividades realizadas por persona y numero de personas
-            CREATE OR REPLACE FUNCTION ImporteActividades (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE FUNCTION f_devolver_importeactividades (p_CodEst estancias.codigo%TYPE)
             RETURN NUMBER
             IS
                 v_actividades NUMBER;
@@ -217,47 +225,47 @@
                 RETURN v_actividades;
             EXCEPTION
                 WHEN NO_DATA_FOUND THEN
-                    RETURN 'Actividades no encontrada';
+                    RETURN 'Actividad no encontrada';
             END;
             /
 
         -- Procedimiento para mostrar las actividades realizadas
-            	CREATE OR REPLACE PROCEDURE ActividadRealizada (p_CodEst estancias.codigo%TYPE)
-		AS 
-		    CURSOR c_actividadReal IS
-		    SELECT fecha, nombre, numpersonas, (precioporpersona * numpersonas) AS total
-		    FROM actividadesrealizadas, actividades
-		    WHERE codigo = codigoactividad AND codigoestancia = (SELECT codigo
-				                                                 FROM estancias
-				                                                 WHERE codigo = p_CodEst);
-		BEGIN
-		    IF TodoIncluido(p_CodEst) != 'TI' THEN
-                FOR c IN c_actividadReal LOOP
-                    IF TO_DATE(SYSDATE, 'DD-MM-YYYY hh24:mi') != c.fecha THEN
-                        DBMS_OUTPUT.PUT_LINE('Actividades realizadas');
-                        DBMS_OUTPUT.PUT_LINE('---------------------');
-                        DBMS_OUTPUT.PUT_LINE(c.fecha||chr(7)||c.nombre||chr(7)||c.numpersonas||chr(7)||c.total);
-                    END IF;
-                END LOOP;
-			    DBMS_OUTPUT.PUT_LINE('Importe Total Actividades Realizadas: '||ImporteActividades(p_CodEst));
-		    ELSIF TodoIncluido(p_CodEst) = 'TI' THEN
-			    DBMS_OUTPUT.PUT_LINE('');
-		    END IF;
-		END;
-		/
+            CREATE OR REPLACE PROCEDURE p_mostrar_ActividadRealizada (p_CodEst estancias.codigo%TYPE)
+		    AS 
+                CURSOR c_actividadReal IS
+                SELECT fecha, nombre, numpersonas, (precioporpersona * numpersonas) AS total
+                FROM actividadesrealizadas, actividades
+                WHERE codigo = codigoactividad AND codigoestancia = (SELECT codigo
+                                                                    FROM estancias
+                                                                    WHERE codigo = p_CodEst);
+		    BEGIN
+                IF f_comprobar_TodoIncluido(p_CodEst) != 'TI' THEN
+                    FOR c_registro IN c_actividadReal LOOP
+                        IF TO_DATE(SYSDATE, 'DD-MM-YYYY hh24:mi') != c.fecha THEN
+                            DBMS_OUTPUT.PUT_LINE('Actividades realizadas');
+                            DBMS_OUTPUT.PUT_LINE('---------------------');
+                            DBMS_OUTPUT.PUT_LINE(c_registro.fecha||chr(9)||c_registro.nombre||chr(9)||c_registro.numpersonas||chr(9)||c_registro.total);
+                        END IF;
+                    END LOOP;
+                    DBMS_OUTPUT.PUT_LINE('Importe Total Actividades Realizadas: '||f_devolver_importeactividades(p_CodEst));
+                ELSIF f_comprobar_TodoIncluido(p_CodEst) = 'TI' THEN
+                    DBMS_OUTPUT.PUT_LINE('');
+                END IF;
+            END;
+            /
 
         
         -- Procedimiento para calcular la factura
-            CREATE OR REPLACE PROCEDURE Factura (p_CodEst estancias.codigo%TYPE)
+            CREATE OR REPLACE PROCEDURE p_calcular_factura (p_CodEst estancias.codigo%TYPE)
             AS
                 v_alojamiento NUMBER;
                 v_gastosextras NUMBER;
                 v_actividadesReal NUMBER;
                 v_TotalGastos NUMBER;
             BEGIN
-                v_alojamiento := Alojamiento(p_CodEst);
-                v_gastosextras := GastosExtras(p_CodEst);
-                v_actividadesReal := ActividadRealizada(p_CodEst);
+                v_alojamiento := f_devolver_ImporteAlojamiento(p_CodEst);
+                v_gastosextras := f_devolver_importeGastosExtras(p_CodEst);
+                v_actividadesReal := f_devolver_importeactividades(p_CodEst);
                 v_TotalGastos := v_alojamiento + v_gastosextras + v_actividadesReal;
                 DBMS_OUTPUT.PUT_LINE('Importe Factura: '||v_TotalGastos);
             END;
@@ -270,15 +278,15 @@
                 DBMS_OUTPUT.PUT_LINE('Complejo Rural La Fuente');
                 DBMS_OUTPUT.PUT_LINE('Candelario (Salamanca)');
                 DBMS_OUTPUT.PUT_LINE(chr(5));
-                Regimen(p_CodEst);
+                p_mostrar_regimen(p_CodEst);
                 DBMS_OUTPUT.PUT_LINE(chr(5));
-                Alojamiento(p_CodEst);
+                p_mostrar_estancia(p_CodEst);
                 DBMS_OUTPUT.PUT_LINE(chr(5));
-                GastosExtras(p_CodEst);
+                p_mostrar_GastosExtras(p_CodEst);
                 DBMS_OUTPUT.PUT_LINE(chr(5));
-                ActividadRealizada(p_CodEst);
+                p_mostrar_ActividadRealizada(p_CodEst);
                 DBMS_OUTPUT.PUT_LINE(chr(5));
-                Factura(p_CodEst);
+                p_calcular_factura(p_CodEst);
             END;
             /
 
