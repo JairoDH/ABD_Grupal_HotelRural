@@ -3,6 +3,147 @@
 -- contrario. Debes controlar las siguientes excepciones: Cliente inexistente, Actividad Inexistente, Actividad realizada
 -- en régimen de Todo Incluido y El cliente nunca ha realizado esa actividad.
 
+## ORACLE
+
+- Cliente inexistente.
+
+
+create or replace procedure Clienteinexistente (p_clientenif personas.NIF%type)
+IS 
+
+    v_codcliente number;
+
+begin
+
+    select COUNT(*) INTO v_codcliente
+    FROM personas
+    where NIF = p_clientenif;
+    if v_codcliente=0 then 
+        RAISE_APPLICATION_ERROR(-20001, "ESTE CLIENTE NO EXISTE")
+    end if;
+end;
+/
+
+
+- Actividad Inexistente
+
+
+create or replace procedure actividadinexistente (p_actividad actividades.codigoQ%type)
+IS 
+
+    v_codactividad number;
+
+begin
+
+    select COUNT(*) INTO v_codactividad
+    FROM actividades
+    where codigo = p_actividad;
+    if v_codactividad=0 then 
+        RAISE_APPLICATION_ERROR(-20002, "ESTA ACTIVIDAD NO EXISTE")
+    end if;
+end;
+/
+
+
+- Todo incluido
+
+CREATE OR REPLACE PROCEDURE todoincluido (v_codActividad actividades.codigo%type)
+IS
+    v_todoincluido NUMBER;
+BEGIN 
+    SELECT COUNT(*)
+    INTO v_todoincluido
+    FROM actividadesrealizadas
+    WHERE codigoestancia IN (SELECT MAX(codigo) FROM estancias WHERE codigoregimen = 'TI')
+    AND codigoactividad = v_codActividad;
+
+    IF v_todoincluido > 0 THEN 
+        dbms_output.put_line('True');
+    ELSE
+        dbms_output.put_line('False');
+    END IF;
+END;
+/
+
+
+
+- El cliente nunca ha realizado esa actividad.
+
+create or replace procedure noactividad (p_nif personas.NIF%type, p_codigo actividadesrealizadas.codigoactividad%type)
+IS
+    v_cliente number;
+begin
+    select COUNT(*) into v_cliente
+    FROM estancias where NIFCliente = p_nif and 
+    codigo in (select codigoestancia from actividadesrealizadas where codigoactividad=p_codigo);
+    if v_cliente > 0 then
+        dbms_output.put_line('Si ha realizado esta actividad');
+    ELSE
+        dbms_output.put_line('El cliente no ha realizado nunca esta actividad');
+    END IF;
+end; 
+/
+
+
+- Agrupal excepciones
+
+CREATE OR REPLACE PROCEDURE Excepciones (p_clin personas.NIF%type,p_codac actividades.codigo%type)
+IS
+BEGIN
+    Clienteinexistente(p_clin);
+    actividadinexistente(p_codac);
+    todoincluido(p_codac);
+    noactividad(p_clin, p_codac);
+END;
+/
+
+
+- Actividad abonada
+
+
+CREATE OR REPLACE PROCEDURE A_Abonada (p_codcl personas.nif%type,
+p_codacti actividades.codigo%type)
+IS
+    CURSOR c_abonada IS
+    SELECT *
+    FROM actividadesrealizadas
+    WHERE codigoestancia = (SELECT codigo FROM estancias WHERE
+    nifcliente=p_codcl) AND codigoactividad=p_codacti
+    ORDER BY fecha DESC
+    FETCH FIRST 1 ROWS ONLY;
+    v_actabo actividadesrealizadas%ROWTYPE;
+BEGIN
+    OPEN c_abonada;
+    FETCH c_abonada INTO v_actabo;
+    IF v_actabo.abonado = 'N' THEN
+
+    DBMS_OUTPUT.PUT_LINE('FALSE');
+    ELSE
+    DBMS_OUTPUT.PUT_LINE('TRUE');
+    END IF;
+
+    CLOSE c_abonada;
+
+END;
+/
+
+
+- Función.
+
+CREATE OR REPLACE FUNCTION comprobarPago (p_codcliente personas.NIF%type, p_codactividad
+actividades.codigo%type)
+RETURN BOOLEAN
+IS
+    v_cliente BOOLEAN;
+BEGIN
+    Excepciones(v_codcliente, v_codactividad);
+    A_Abonada(v_codcliente, v_codactividad);
+    RETURN v_cliente;
+END;
+/
+
+
+
 -- 2.Realiza un procedimiento llamado ImprimirFactura que reciba un código de estancia e imprima la factura vinculada
 -- a la misma. Debes tener en cuenta que la factura tendrá el siguiente formato:
 
@@ -362,6 +503,62 @@
 -- 8.Realiza los módulos de programación necesarios para que un cliente no pueda realizar dos estancias que se
 -- solapen en fechas entre ellas, esto es, un cliente no puede comenzar una estancia hasta que no haya terminado la
 -- anterior.
+
+-- Creacion del paquete para controlar las fechas.
+
+CREATE OR REPLACE PACKAGE Solapada AS
+
+  TYPE registro_fechas_typ IS RECORD (
+    cliente_nif estancias.nifcliente%TYPE,
+    inicio_fecha estancias.fecha_inicio%TYPE,
+    fin_fecha estancias.fecha_fin%TYPE
+  );
+
+  TYPE tabla_fechas_typ IS TABLE OF registro_fechas_typ INDEX BY BINARY_INTEGER;
+  fechas tabla_fechas_typ;
+END Solapada;
+/
+
+-----------------------------------------------------------------------------------------
+-- Rellenar tabla.
+
+CREATE OR REPLACE TRIGGER rellenarfechas
+BEFORE INSERT OR UPDATE ON estancias
+DECLARE
+  CURSOR cursor_fechas IS SELECT nifcliente, fecha_inicio, fecha_fin FROM estancias;
+  ind NUMBER := 0;
+BEGIN
+  FOR i IN cursor_fechas LOOP
+    Solapada.fechas(ind).cliente_nif := i.nifcliente;
+    Solapada.fechas(ind).inicio_fecha := i.fecha_inicio;
+    Solapada.fechas(ind).fin_fecha := i.fecha_fin;
+    indice := indice + 1;
+  END LOOP;
+END rellenarfechas;
+/
+
+--------------------------------------------------------------------------------------------------
+-- Comprobar fecha
+
+
+CREATE OR REPLACE TRIGGER comprobarfecha
+BEFORE INSERT OR UPDATE ON estancias
+FOR EACH ROW
+DECLARE
+BEGIN
+  FOR i IN Solapada.fechas.FIRST..Solapada.fechas.LAST LOOP
+    IF Solapada.fechas(i).cliente_nif = :NEW.nifcliente THEN
+      IF :NEW.fecha_inicio BETWEEN Solapada.fechas(i).inicio_fecha AND Solapada.fechas(i).fin_fecha THEN
+        RAISE_APPLICATION_ERROR(-20000, 'No se puede mas de dos en el mismo dia');
+      END IF;
+      
+      IF :NEW.fecha_fin BETWEEN Solapada.fechas(i).inicio_fecha AND Solapada.fechas(i).fin_fecha THEN
+        RAISE_APPLICATION_ERROR(-20001, 'No se puede mas de dos en el mismo dia');
+      END IF;
+    END IF;
+  END LOOP;
+END comprobarfecha;
+/
 
 
 
