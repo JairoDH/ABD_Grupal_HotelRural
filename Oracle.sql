@@ -129,9 +129,12 @@ create table actividadesrealizadas
 
 -//Temporadas	
 
-INSERT INTO temporadas VALUES ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
-INSERT INTO temporadas VALUES ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
-INSERT INTO temporadas VALUES ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES  ('01','Baja', to_date('01-11-2023','DD-MM-YYYY'), to_date('31-03-2024','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES  ('02','Alta', to_date('01-04-2023','DD-MM-YYYY'), to_date('31-10-2023','DD-MM-YYYY'));
+INSERT INTO temporadas
+VALUES ('03','Especial', to_date('24-12-2023','DD-MM-YYYY'), to_date('06-01-2023','DD-MM-YYYY'));
 
 
 -//Regimenes	
@@ -206,9 +209,9 @@ INSERT INTO habitaciones VALUES ('11','03');
 
 -//Personas -- nif, nombre, apellidos, direccion, localidad
 INSERT INTO personas VALUES ('54890865P','Alvaro','Rodriguez Marquez','C\ Alemania n 19','Madrid (Madrid)');
-INSERT INTO personas VALUES ('40687067K','Aitor','Leon Delgado','Ciudad Blanca Blq 16 1-D','Adanero (Ávila)');
-INSERT INTO personas VALUES ('77399071T','Virginia','Leon Delgado','Ciudad Blanca Blq 16 1-D','Muiopepe (Ávila)');
-INSERT INTO personas VALUES ('69191424H','Antonio Agustin','Fernandez Melendez','C\Armero n 19','Muñico (Ávila)');
+INSERT INTO personas VALUES ('40687067K','Aitor','Leon Delgado','Ciudad Blanca Blq 16 1-D','Adanero (Avila)');
+INSERT INTO personas VALUES ('77399071T','Virginia','Leon Delgado','Ciudad Blanca Blq 16 1-D','Muiopepe (Avila)');
+INSERT INTO personas VALUES ('69191424H','Antonio Agustin','Fernandez Melendez','C\Armero n 19','Muñico (Avila)');
 INSERT INTO personas VALUES ('36059752F','Antonio','Melendez Delgado','C\Armero n 18','Navadijos (Avila)');
 INSERT INTO personas VALUES ('10402498N','Carlos','Mejias Calatrava','C\ Francisco de Rioja n 9','Abusejo (Salamanca)');
 INSERT INTO personas VALUES ('10950967T','Ana','Gutierrez Bando','C\ Burgos n 3','Alaraz (Salamanca)');
@@ -236,18 +239,18 @@ INSERT INTO facturas VALUES ('04','05',to_DATE('12-01-2015 16:35','DD-MM-YYYY hh
 INSERT INTO facturas VALUES ('05','01',to_DATE('25-05-2015 17:00','DD-MM-YYYY hh24:mi'));
 
 -//Gastos Extras -- codigogasto, codigoestancia, fecha, concepto, cuantia
-INSERT INTO gastos_extra VALUES ('00','03',to_DATE('15-03-2015 18:23','DD-MM-YYYY hh24:mi'),'Bolos',7);
-INSERT INTO gastos_extra VALUES ('01','02',to_DATE('20-09-2015 19:15','DD-MM-YYYY hh24:mi'),'Centro de pasatiempo de mascotas',12);
-INSERT INTO gastos_extra VALUES ('02','01',to_DATE('23-05-2015 12:40','DD-MM-YYYY hh24:mi'),'Piscina privada',2);
-INSERT INTO gastos_extra VALUES ('03','01',to_DATE('23-05-2015 17:50','DD-MM-YYYY hh24:mi'),'Wifi',2);
-INSERT INTO gastos_extra VALUES ('04','03',to_DATE('15-03-2015 20:00','DD-MM-YYYY hh24:mi'),'Masajes',8);
-INSERT INTO gastos_extra VALUES ('05','05',to_DATE('11-01-2016 16:00','DD-MM-YYYY hh24:mi'),'Spa',8);
-INSERT INTO gastos_extra VALUES ('06','07',to_DATE('24-02-2016 16:45','DD-MM-YYYY hh24:mi'),'Alquiler de bicicletas',5);
-INSERT INTO gastos_extra VALUES ('07','02',to_DATE('20-09-2015 16:00','DD-MM-YYYY hh24:mi'),'Television',2);
-INSERT INTO gastos_extra VALUES ('08','04',to_DATE('02-08-2015 13:30','DD-MM-YYYY hh24:mi'),'Rellenar minibar', 15);
-INSERT INTO gastos_extra VALUES ('09','00',to_DATE('12-03-2016 18:15','DD-MM-YYYY hh24:mi'),'Aire acondicionado', 6);
-INSERT INTO gastos_extra VALUES ('10','06',to_DATE('28-12-2015 19:23','DD-MM-YYYY hh24:mi'),'Telefono',3);
-INSERT INTO gastos_extra VALUES ('11','02',to_DATE('21-09-2015 10:00','DD-MM-YYYY hh24:mi'),'Alquiler de pistas',2);
+INSERT INTO gastos_extras VALUES ('00','03',to_DATE('15-03-2015 18:23','DD-MM-YYYY hh24:mi'),'Bolos',7);
+INSERT INTO gastos_extras VALUES ('01','02',to_DATE('20-09-2015 19:15','DD-MM-YYYY hh24:mi'),'Centro de pasatiempo de mascotas',12);
+INSERT INTO gastos_extras VALUES ('02','01',to_DATE('23-05-2015 12:40','DD-MM-YYYY hh24:mi'),'Piscina privada',2);
+INSERT INTO gastos_extras VALUES ('03','01',to_DATE('23-05-2015 17:50','DD-MM-YYYY hh24:mi'),'Wifi',2);
+INSERT INTO gastos_extras VALUES ('04','03',to_DATE('15-03-2015 20:00','DD-MM-YYYY hh24:mi'),'Masajes',8);
+INSERT INTO gastos_extras VALUES ('05','05',to_DATE('11-01-2016 16:00','DD-MM-YYYY hh24:mi'),'Spa',8);
+INSERT INTO gastos_extras VALUES ('06','07',to_DATE('24-02-2016 16:45','DD-MM-YYYY hh24:mi'),'Alquiler de bicicletas',5);
+INSERT INTO gastos_extras VALUES ('07','02',to_DATE('20-09-2015 16:00','DD-MM-YYYY hh24:mi'),'Television',2);
+INSERT INTO gastos_extras VALUES ('08','04',to_DATE('02-08-2015 13:30','DD-MM-YYYY hh24:mi'),'Rellenar minibar', 15);
+INSERT INTO gastos_extras VALUES ('09','00',to_DATE('12-03-2016 18:15','DD-MM-YYYY hh24:mi'),'Aire acondicionado', 6);
+INSERT INTO gastos_extras VALUES ('10','06',to_DATE('28-12-2015 19:23','DD-MM-YYYY hh24:mi'),'Telefono',3);
+INSERT INTO gastos_extras VALUES ('11','02',to_DATE('21-09-2015 10:00','DD-MM-YYYY hh24:mi'),'Alquiler de pistas',2);
 
 
 
