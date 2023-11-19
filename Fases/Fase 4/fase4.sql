@@ -538,8 +538,8 @@ begin
     for i in cur_actividad loop
         paquete_10personas.v_tablaactividad(indice).codigoactividad := i.codigoactividad;
         paquete_10personas.v_tablaactividad(indice).fecha := i.fecha;
-        paquete_10personas.v_tablaactividad(indice).numpersonas := i.numpersonas;
-        indice = indice + 1;
+        paquete_10personas.v_tablaactividad(indice).numeropersonas := i.numpersonas;
+        indice := indice + 1;
     end loop;
 end rellenarvariablestabla;
 /
@@ -552,15 +552,19 @@ for each row
 declare
 begin
     for i in paquete_10personas.v_tablaactividad.first..paquete_10personas.v_tablaactividad.last loop
-        if paquete_10personas.v_tablaactividad(i).fecha := new.fecha and paquete_10personas.v_tablaactividad(i).numpersonas < 10 and paquete_10personas.v_tablaactividad(i).codigoactividad = :new.codigoactividad then
+        if paquete_10personas.v_tablaactividad(i).fecha = :new.fecha and paquete_10personas.v_tablaactividad(i).numeropersonas < 10 and paquete_10personas.v_tablaactividad(i).codigoactividad = :new.codigoactividad then
             raise_application_error(-20020, 'No pueden participar mas de 10 personas en esta actividad para esta fecha');
-        end if
+        end if;
     end loop;
-    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST+1).codigoactividad:=new.codigoactividad;
-    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).fecha:=new.fecha;
-    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).numpersonas:=new.numpersonas;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST+1).codigoactividad := :new.codigoactividad;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).fecha := :new.fecha;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).numeropersonas := :new.numpersonas;
 end nomasde10;
 /
+
+-- Para comprobar el funcionamiento creo una tabla llamada actividadesrealizadas2 en la que inserto algunos datos.
+-- Estas filas insertadas las añado a la tabla actividadesrealizadas a partir de esta nueva tabla
+
 
 -- 7.Realiza los módulos de programación necesarios para que los precios de un mismo tipo de habitación en una
 -- misma temporada crezca en función de los servicios ofrecidos de esta forma: Precio TI > Precio PC > Precio MP>
