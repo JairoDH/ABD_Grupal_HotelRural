@@ -496,6 +496,72 @@ END;
 -- 6.Realiza los módulos de programación necesarios para que una actividad no sea realizada en una fecha concreta
 -- por más de 10 personas.
 
+-- necesito actividad, fecha y num personas
+
+-- Creo el paquete con el tipo de datos registro. Aqui pongo
+-- los datos que voy a necesitar de la tabla.
+
+create or replace package paquete_10personas
+as
+type tactividad is record
+(
+    codigoactividad actividadesrealizadas.codigoactividad%type,
+    fecha actividadesrealizadas.fecha%type,
+    numeropersonas number
+);
+
+-- Defino el tipo de datos tabla 
+
+type ttablaactividad is table of tactividad
+index by binary_integer;
+
+-- Declaro una variable del tipo tabla antes creado
+
+v_tablaactividad ttablaactividad;
+end paquete_10personas;
+/
+
+-- Empiezo a rellenar la tabla ttablactividad
+
+create or replace trigger rellenarvariablestabla
+before insert or update on actividadesrealizadas
+declare
+    cursor cur_actividad
+    is
+    select codigoactividad, fecha, sum(numpersonas) as numpersonas
+    from actividades a, actividadesrealizadas ar
+    where a.codigo = ar.codigoactividad
+    group by codigoactividad, fecha
+    order by fecha;
+    indice NUMBER := 0;
+begin
+    for i in cur_actividad loop
+        paquete_10personas.v_tablaactividad(indice).codigoactividad := i.codigoactividad;
+        paquete_10personas.v_tablaactividad(indice).fecha := i.fecha;
+        paquete_10personas.v_tablaactividad(indice).numpersonas := i.numpersonas;
+        indice = indice + 1;
+    end loop;
+end rellenarvariablestabla;
+/
+
+-- Hago la comprobación de que no haya mas de 10 personas en una actividad para una fecha concreta.
+
+create or replace trigger nomasde10
+before insert or update on actividadesrealizadas
+for each row 
+declare
+begin
+    for i in paquete_10personas.v_tablaactividad.first..paquete_10personas.v_tablaactividad.last loop
+        if paquete_10personas.v_tablaactividad(i).fecha := new.fecha and paquete_10personas.v_tablaactividad(i).numpersonas < 10 and paquete_10personas.v_tablaactividad(i).codigoactividad = :new.codigoactividad then
+            raise_application_error(-20020, 'No pueden participar mas de 10 personas en esta actividad para esta fecha');
+        end if
+    end loop;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST+1).codigoactividad:=new.codigoactividad;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).fecha:=new.fecha;
+    paquete_10personas.v_tablaactividad(paquete_10personas.v_tablaactividad.LAST).numpersonas:=new.numpersonas;
+end nomasde10;
+/
+
 -- 7.Realiza los módulos de programación necesarios para que los precios de un mismo tipo de habitación en una
 -- misma temporada crezca en función de los servicios ofrecidos de esta forma: Precio TI > Precio PC > Precio MP>
 -- Precio AD
