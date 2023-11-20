@@ -493,6 +493,45 @@ END;
 -- hotel paga a la empresa el coste de la actividad. Si no está en TI, el hotel recibe un porcentaje de comisión del
 -- importe que paga el cliente por realizar la actividad.
 
+-- Creo la columna
+
+alter table actividades add (BalanceHotel number(10,2));
+
+-- Procedimiento para actualizar los datos de la columna nueva
+
+create or replace procedure actualizar_balance_hotel(p_codigo_actividad varchar2)
+is
+  v_balance number(10,2) := 0;
+begin
+  select sum(
+           case
+             when p.codigoregimen = 'TI' then a.costepersonaparahotel * ar.numpersonas
+             else -1 * a.comisionhotel * ar.numpersonas
+           end
+         ) into v_balance
+    from actividades a
+         join actividadesrealizadas ar on a.codigo = ar.codigoactividad
+         join estancias e on ar.codigoestancia = e.codigo
+         join regimenes p on e.codigoregimen = p.codigo
+   where a.codigo = p_codigo_actividad;
+  
+  update actividades
+     set balancehotel = nvl(v_balance, 0)
+   where codigo = p_codigo_actividad;
+end actualizar_balance_hotel;
+/
+
+
+-- Crear trigger para actualizar BalanceHotel después de un cambio en actividadesrealizadas
+
+create or replace trigger trg_actualizar_balance_hotel
+after insert or update or delete on actividadesrealizadas
+for each row
+begin
+  actualizar_balance_hotel(:new.codigoactividad);
+end;
+/
+
 -- 6.Realiza los módulos de programación necesarios para que una actividad no sea realizada en una fecha concreta
 -- por más de 10 personas.
 
