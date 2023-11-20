@@ -570,6 +570,75 @@ end nomasde10;
 -- misma temporada crezca en función de los servicios ofrecidos de esta forma: Precio TI > Precio PC > Precio MP>
 -- Precio AD
 
+    -- Paquete de módulos para controlar las habitaciones
+
+CREATE OR REPLACE PACKAGE servicios AS
+
+    TYPE t_registro_habitacion IS RECORD (
+        codigo_hab tarifas.codigotipohabitacion%TYPE,
+        codigo_temp tarifas.codigotemporada%TYPE,
+        precios tarifas.preciopordia%TYPE,
+        codigo_reg tarifas.codigoregimen%TYPE
+    );
+
+    TYPE t_tabla_habitacion IS TABLE OF t_registro_habitacion INDEX BY BINARY_INTEGER;
+    precio_hab t_tabla_habitacion
+END servicios;
+/
+
+    -- Rellenar la tabla 
+
+    CREATE OR REPLACE TRIGGER rellenarhabitaciones
+    BEFORE INSERT OR UPDATE ON tarifas
+    DECLARE
+        CURSOR c_habitacion IS
+            SELECT codigotipohabitacion, codigotemporada, codigoregimen, preciopordia 
+            FROM tarifas;
+            indice NUMBER := 0;
+        BEGIN
+            FOR v IN c_habitacion LOOP
+                servicios.precio_hab(indice).codigo_hab := v.codigotipohabitacion;
+                servicios.precio_hab(indice).codigo_temp := v.codigotemporada;
+                servicios.precio_hab(indice).precios := v.preciopordia;
+                servicios.precio_hab(indice).codigo_reg := v.codigoregimen;
+                indice := indice +1;
+            END LOOP;
+        END rellenarhabitaciones;
+        /
+
+    -- Comprobar los servicios
+
+    CREATE OR REPLACE TRIGGER comprobar_regimenes
+    BEFORE INSERT OR UPDATE ON tarifas
+    FOR EACH ROW
+    DECLARE
+        v_factor NUMBER := 1;
+    BEGIN
+        FOR v IN servicios.precio_hab.FIRST..servicios.precio_hab.LAST LOOP
+            IF servicios.precio_hab(v).codigo_hab = :NEW.codigotipohabitacion AND servicios.precio_hab(v).codigo_temp = :NEW.codigotemporada THEN
+                CASE servicios.precio_hab(v).codigo_reg
+                    WHEN 'TI' THEN
+                        v_factor := 10;
+                    WHEN 'PC' THEN
+                        v_factor := 8;
+                    WHEN 'MP' THEN
+                        v_factor := 6;
+                    WHEN 'AD' THEN
+                        v_factor := 4;
+                    ELSE
+                        v_factor := 1; 
+                END CASE;
+
+                :NEW.preciopordia := :NEW.preciopordia * v_factor;
+            END IF;
+        END LOOP;
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Error en el trigger: ' || SQLERRM);
+    END;
+    /
+            
+
 -- 8.Realiza los módulos de programación necesarios para que un cliente no pueda realizar dos estancias que se
 -- solapen en fechas entre ellas, esto es, un cliente no puede comenzar una estancia hasta que no haya terminado la
 -- anterior.

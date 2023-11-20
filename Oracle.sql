@@ -154,7 +154,6 @@ INSERT INTO tipos_de_habitacion VALUES ('05','Bungalow');
 
 -//Tarifas -- codigo, codigotipohabitacion, codigotemporada, codigoregimen, preciopordia
 INSERT INTO tarifas VALUES ('00','01','01','AD',50);
-INSERT INTO tarifas VALUES ('00','01','01','AD',50);
 INSERT INTO tarifas VALUES ('01','01','02','AD',70);
 INSERT INTO tarifas VALUES ('02','01','03','AD',60);
 INSERT INTO tarifas VALUES ('03','02','01','AD',60);
